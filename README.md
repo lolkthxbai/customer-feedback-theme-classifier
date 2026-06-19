@@ -142,6 +142,14 @@ Then open the local Streamlit URL shown in your terminal, usually:
 http://localhost:8501
 ```
 
+## Testing
+
+Run the automated tests from the project root:
+
+```bash
+pytest -q
+```
+
 ## Project Structure
 
 ```text
