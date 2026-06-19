@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -21,6 +22,7 @@ from src.config import (
 from src.data_loader import limit_rows, load_csv, validate_required_columns
 from src.evaluation import create_confusion_matrix_figure, evaluate_model, get_top_categories
 from src.model import (
+    load_model,
     predict_theme_with_confidence,
     predict_themes_with_confidence,
     save_model,
@@ -53,6 +55,8 @@ if "evaluation_results" not in st.session_state:
     st.session_state.evaluation_results = None
 if "batch_prediction_results" not in st.session_state:
     st.session_state.batch_prediction_results = None
+if "model_metadata" not in st.session_state:
+    st.session_state.model_metadata = {}
 
 st.sidebar.header("Controls")
 target_column = st.sidebar.selectbox(
@@ -77,6 +81,99 @@ test_size = st.sidebar.slider(
 save_trained_model = st.sidebar.checkbox("Save trained model", value=True)
 use_api = st.sidebar.checkbox("Fetch sample data from CFPB API")
 train_requested = st.sidebar.button("Train Model", type="primary")
+
+with st.sidebar.expander("Saved model"):
+    model_file = Path(MODEL_PATH)
+    if model_file.exists():
+        st.write(f"Model file found: {MODEL_PATH}")
+        if st.button("Load Saved Model"):
+            try:
+                loaded_model, loaded_metadata = load_model(MODEL_PATH)
+                st.session_state.model_pipeline = loaded_model
+                st.session_state.model_metadata = loaded_metadata
+                st.session_state.evaluation_results = None
+                st.session_state.batch_prediction_results = None
+                st.success("Saved model loaded.")
+            except Exception as error:
+                st.error(f"Could not load saved model: {error}")
+    else:
+        st.write("No saved model file yet.")
+
+    model_metadata = st.session_state.model_metadata
+    if model_metadata:
+        st.write(f"Model: {model_metadata.get('model_type', 'Unknown')}")
+        if "target_column" in model_metadata:
+            st.write(f"Target: {model_metadata['target_column']}")
+        if "training_rows" in model_metadata:
+            st.write(f"Training rows: {model_metadata['training_rows']:,}")
+        if "accuracy" in model_metadata:
+            st.write(f"Accuracy: {model_metadata['accuracy']:.2%}")
+        if "trained_at_utc" in model_metadata:
+            st.write(f"Trained: {model_metadata['trained_at_utc']}")
+
+
+def render_classification_tools() -> None:
+    """Render single and batch classification controls for a loaded model."""
+    if st.session_state.model_pipeline is None:
+        return
+
+    st.subheader("Classify New Feedback")
+    user_input = st.text_area("Paste a customer complaint or feedback message")
+    if st.button("Classify Feedback"):
+        if not user_input.strip():
+            st.error("Please enter a complaint or feedback message.")
+        else:
+            cleaned_input = clean_text(user_input)
+            prediction_result = predict_theme_with_confidence(
+                st.session_state.model_pipeline,
+                cleaned_input,
+            )
+            predicted_theme = prediction_result["prediction"]
+            st.success(f"Predicted category: {predicted_theme}")
+
+            confidence_scores = prediction_result.get("confidence_scores", {})
+            if confidence_scores:
+                st.write("Top confidence scores")
+                top_predictions = sorted(
+                    confidence_scores.items(),
+                    key=lambda item: item[1],
+                    reverse=True,
+                )[:5]
+                for label, probability in top_predictions:
+                    st.write(f"{label}: {probability:.2%}")
+
+    st.subheader("Batch Classify Feedback")
+    batch_input = st.text_area(
+        "Paste one feedback message per line",
+        key="batch_feedback_input",
+    )
+    if st.button("Create Prediction File"):
+        feedback_messages = [
+            message.strip()
+            for message in batch_input.splitlines()
+            if message.strip()
+        ]
+        if not feedback_messages:
+            st.error("Enter at least one feedback message.")
+        else:
+            cleaned_feedback = [clean_text(message) for message in feedback_messages]
+            batch_results = predict_themes_with_confidence(
+                st.session_state.model_pipeline,
+                cleaned_feedback,
+            )
+            batch_results["Feedback"] = feedback_messages
+            st.session_state.batch_prediction_results = batch_results
+
+    batch_prediction_results = st.session_state.batch_prediction_results
+    if batch_prediction_results is not None:
+        st.dataframe(batch_prediction_results, use_container_width=True)
+        st.download_button(
+            "Download Predictions CSV",
+            data=batch_prediction_results.to_csv(index=False).encode("utf-8"),
+            file_name="feedback_theme_predictions.csv",
+            mime="text/csv",
+        )
+
 
 uploaded_file = st.file_uploader("Upload CFPB complaint CSV", type=["csv"])
 
@@ -141,12 +238,22 @@ if complaints_df is not None and not complaints_df.empty:
                         test_size=float(test_size),
                     )
                     evaluation_results = evaluate_model(y_test, predictions, labels)
+                    model_metadata = {
+                        "model_type": "TF-IDF + Logistic Regression",
+                        "target_column": target_column,
+                        "training_rows": int(len(clean_df)),
+                        "accuracy": float(evaluation_results["accuracy"]),
+                        "trained_at_utc": datetime.now(timezone.utc).strftime(
+                            "%Y-%m-%d %H:%M UTC"
+                        ),
+                    }
                     st.session_state.model_pipeline = model_pipeline
                     st.session_state.evaluation_results = evaluation_results
                     st.session_state.batch_prediction_results = None
+                    st.session_state.model_metadata = model_metadata
 
                     if save_trained_model:
-                        save_model(model_pipeline, MODEL_PATH)
+                        save_model(model_pipeline, MODEL_PATH, model_metadata)
 
                 st.success("Model training complete.")
                 if save_trained_model:
@@ -173,67 +280,7 @@ if complaints_df is not None and not complaints_df.empty:
         else:
             st.caption("Train a model to see accuracy and classification metrics.")
 
-        st.subheader("Classify New Feedback")
-        user_input = st.text_area("Paste a customer complaint or feedback message")
-        if st.button("Classify Feedback"):
-            if not user_input.strip():
-                st.error("Please enter a complaint or feedback message.")
-            elif st.session_state.model_pipeline is None:
-                st.error("Please train a model before classifying new feedback.")
-            else:
-                cleaned_input = clean_text(user_input)
-                prediction_result = predict_theme_with_confidence(
-                    st.session_state.model_pipeline,
-                    cleaned_input,
-                )
-                predicted_theme = prediction_result["prediction"]
-                st.success(f"Predicted category: {predicted_theme}")
-
-                confidence_scores = prediction_result.get("confidence_scores", {})
-                if confidence_scores:
-                    st.write("Top confidence scores")
-                    top_predictions = sorted(
-                        confidence_scores.items(),
-                        key=lambda item: item[1],
-                        reverse=True,
-                    )[:5]
-                    for label, probability in top_predictions:
-                        st.write(f"{label}: {probability:.2%}")
-
-        st.subheader("Batch Classify Feedback")
-        batch_input = st.text_area(
-            "Paste one feedback message per line",
-            key="batch_feedback_input",
-        )
-        if st.button("Create Prediction File"):
-            if st.session_state.model_pipeline is None:
-                st.error("Please train a model before creating predictions.")
-            else:
-                feedback_messages = [
-                    message.strip()
-                    for message in batch_input.splitlines()
-                    if message.strip()
-                ]
-                if not feedback_messages:
-                    st.error("Enter at least one feedback message.")
-                else:
-                    cleaned_feedback = [clean_text(message) for message in feedback_messages]
-                    batch_results = predict_themes_with_confidence(
-                        st.session_state.model_pipeline,
-                        cleaned_feedback,
-                    )
-                    batch_results["Feedback"] = feedback_messages
-                    st.session_state.batch_prediction_results = batch_results
-
-        batch_prediction_results = st.session_state.batch_prediction_results
-        if batch_prediction_results is not None:
-            st.dataframe(batch_prediction_results, use_container_width=True)
-            st.download_button(
-                "Download Predictions CSV",
-                data=batch_prediction_results.to_csv(index=False).encode("utf-8"),
-                file_name="feedback_theme_predictions.csv",
-                mime="text/csv",
-            )
+        render_classification_tools()
 
         st.subheader("Business Insights")
         chart_columns = [
@@ -254,14 +301,8 @@ if complaints_df is not None and not complaints_df.empty:
                     st.bar_chart(chart_df)
 else:
     st.write("Upload a CFPB complaint CSV to begin.")
+    render_classification_tools()
 
 with st.sidebar.expander("Data source"):
     st.write("Download public data from the CFPB Consumer Complaint Database.")
     st.write("CSV upload is the primary workflow. API sample fetch is optional.")
-
-with st.sidebar.expander("Saved model"):
-    model_file = Path(MODEL_PATH)
-    if model_file.exists():
-        st.write(f"Model file found: `{MODEL_PATH}`")
-    else:
-        st.write("No saved model file yet.")

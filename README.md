@@ -54,7 +54,7 @@ The sample is intentionally small. Its accuracy and category counts are not mean
 - Choose either `Product` or `Issue` as the target label.
 - Evaluate model accuracy and classification metrics.
 - Display a confusion matrix to identify commonly confused categories.
-- Save the trained model locally with joblib.
+- Save and reload trained models locally with training metadata.
 - Paste a new complaint or feedback message and predict its likely category.
 - Display prediction confidence scores when available.
 - Create and download CSV results for multiple feedback messages.
@@ -152,6 +152,12 @@ Run the automated tests from the project root:
 pytest -q
 ```
 
+## Saved Model
+
+When Save trained model is selected, the app stores the pipeline with its target label, training-row count, accuracy, model type, and training time. On a later app session, use Load Saved Model in the sidebar to restore it for single or batch classification without uploading data again.
+
+Only load model files you created or trust. Joblib artifacts can execute code when loaded.
+
 ## Project Structure
 
 ```text
@@ -212,6 +218,5 @@ The `.gitignore` file excludes downloaded CSV files and `models/*.joblib`. The o
 
 - Add a Multinomial Naive Bayes comparison model.
 - Add screenshots to this README.
-- Add unit tests with pytest.
 - Deploy the app to Streamlit Community Cloud.
 - Expand the exploratory notebook with charts and data quality checks.

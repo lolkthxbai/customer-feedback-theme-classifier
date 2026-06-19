@@ -81,20 +81,34 @@ def train_model(
     return model_pipeline, y_test, pd.Series(predictions, index=y_test.index), class_labels
 
 
-def save_model(model: Pipeline, model_path: str) -> None:
+def save_model(
+    model: Pipeline,
+    model_path: str,
+    metadata: dict[str, object] | None = None,
+) -> None:
     """
-    Save trained model pipeline using joblib.
+    Save the trained model pipeline and its metadata using joblib.
     """
     path = Path(model_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, path)
+    joblib.dump({"model": model, "metadata": metadata or {}}, path)
 
 
-def load_model(model_path: str) -> Pipeline:
+def load_model(model_path: str) -> tuple[Pipeline, dict[str, object]]:
     """
-    Load saved model pipeline using joblib.
+    Load a saved model pipeline and its metadata using joblib.
+    Support pipeline-only artifacts saved by earlier app versions.
     """
-    return joblib.load(model_path)
+    saved_artifact = joblib.load(model_path)
+
+    if isinstance(saved_artifact, dict) and "model" in saved_artifact:
+        metadata = saved_artifact.get("metadata", {})
+        return saved_artifact["model"], metadata if isinstance(metadata, dict) else {}
+
+    return saved_artifact, {
+        "artifact_format": "legacy",
+        "model_type": "Legacy model (metadata unavailable)",
+    }
 
 
 def predict_theme(model: Pipeline, text: str) -> str:
