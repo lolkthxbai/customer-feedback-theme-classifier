@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 venv/
 data/*.csv
+!data/sample_complaints.csv
 models/*.joblib
 .ipynb_checkpoints/
 .DS_Store

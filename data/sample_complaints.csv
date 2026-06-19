@@ -1,0 +1,31 @@
+Consumer complaint narrative,Product,Issue,State,Company,Submitted via,Company response to consumer
+"My checking account balance does not reflect a deposit I made yesterday.",Checking or savings account,Managing an account,NY,Sample Community Bank,Web,In progress
+"The mobile app will not let me transfer money between my savings and checking accounts.",Checking or savings account,Managing an account,CA,Sample Community Bank,Web,Closed with explanation
+"I was charged a monthly checking fee even though I met the account requirements.",Checking or savings account,Fees or charges,TX,Sample Community Bank,Phone,Closed with monetary relief
+"My debit card purchase is missing from my checking account transaction history.",Checking or savings account,Managing an account,FL,Sample Community Bank,Web,Closed with explanation
+"The bank placed a hold on my savings deposit without explaining when it will clear.",Checking or savings account,Managing an account,IL,Sample Community Bank,Referral,In progress
+"I cannot update the mailing address connected to my savings account online.",Checking or savings account,Managing an account,WA,Sample Community Bank,Web,Closed with explanation
+"My credit card payment was applied after the due date even though I paid on time.",Credit card,Problems when you are unable to pay,OH,Example Card Services,Web,Closed with explanation
+"The card issuer raised my interest rate without giving me a clear reason.",Credit card,Other features terms or problems,GA,Example Card Services,Phone,Closed with non-monetary relief
+"A merchant refund appeared on my credit card but then disappeared from the balance.",Credit card,Trouble using your card,NC,Example Card Services,Web,In progress
+"My replacement credit card has not arrived and the old card no longer works.",Credit card,Trouble using your card,VA,Example Card Services,Web,Closed with explanation
+"I do not recognize a recurring charge on my credit card statement.",Credit card,Trouble using your card,CO,Example Card Services,Phone,Closed with monetary relief
+"The website rejects my credit card payment even though the bank account has funds.",Credit card,Problems when you are unable to pay,PA,Example Card Services,Web,Closed with explanation
+"My mortgage servicer reported that I missed a payment I made before the due date.",Mortgage,Trouble during payment process,MI,Demo Home Lending,Web,In progress
+"I need an explanation of why my monthly mortgage payment increased.",Mortgage,Trouble during payment process,AZ,Demo Home Lending,Phone,Closed with explanation
+"The mortgage company keeps sending notices to my old address after I updated it.",Mortgage,Managing the loan or lease,OR,Demo Home Lending,Web,Closed with explanation
+"I requested mortgage assistance but have not received a decision after several weeks.",Mortgage,Struggling to pay mortgage,MA,Demo Home Lending,Web,In progress
+"My escrow amount changed and I cannot see the calculation used by the servicer.",Mortgage,Trouble during payment process,NJ,Demo Home Lending,Referral,Closed with explanation
+"The mortgage portal does not show the payment I submitted last month.",Mortgage,Trouble during payment process,TN,Demo Home Lending,Web,Closed with monetary relief
+"I sent money to a family member but the transfer has been pending for two days.",Money transfer virtual currency or money service,Money was not available when promised,MD,Sample Transfer Network,Web,In progress
+"The transfer service charged a fee that was not shown before I confirmed the payment.",Money transfer virtual currency or money service,Unexpected or other fees,MO,Sample Transfer Network,Phone,Closed with monetary relief
+"My recipient never received the money transfer but my account was debited.",Money transfer virtual currency or money service,Money was not available when promised,NV,Sample Transfer Network,Web,Closed with explanation
+"I cannot verify my identity in the money transfer application.",Money transfer virtual currency or money service,Other service problem,WI,Sample Transfer Network,Web,Closed with non-monetary relief
+"The transfer app closed my account while I still had money available.",Money transfer virtual currency or money service,Other service problem,IN,Sample Transfer Network,Phone,In progress
+"The exchange rate for my international transfer was different from the rate shown.",Money transfer virtual currency or money service,Unexpected or other fees,UT,Sample Transfer Network,Web,Closed with explanation
+"My credit report lists a loan account that does not belong to me.",Credit reporting or other personal consumer reports,Incorrect information on your report,SC,Example Credit Bureau,Web,In progress
+"The credit bureau did not remove a collection account after I disputed it.",Credit reporting or other personal consumer reports,Incorrect information on your report,AL,Example Credit Bureau,Mail,Closed with explanation
+"I cannot access my online credit report because the identity questions keep failing.",Credit reporting or other personal consumer reports,Problem with a credit reporting company's investigation,KS,Example Credit Bureau,Web,Closed with non-monetary relief
+"My credit score changed dramatically and the report does not explain the change.",Credit reporting or other personal consumer reports,Problem with your credit report or credit score,IA,Example Credit Bureau,Web,Closed with explanation
+"The report still shows a late payment that my lender confirmed was corrected.",Credit reporting or other personal consumer reports,Incorrect information on your report,CT,Example Credit Bureau,Phone,Closed with monetary relief
+"A hard inquiry appears on my credit file even though I did not apply for credit.",Credit reporting or other personal consumer reports,Incorrect information on your report,ME,Example Credit Bureau,Web,In progress

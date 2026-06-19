@@ -37,6 +37,12 @@ The expected CSV columns include:
 
 The project does not include downloaded complaint data in the repository. CSV files should be downloaded locally from CFPB and uploaded through the Streamlit app.
 
+### Try It With Sample Data
+
+For a quick local smoke test, upload [`data/sample_complaints.csv`](data/sample_complaints.csv). It contains synthetic complaint-style records only; it is included to confirm the upload, training, prediction, and chart workflows work end to end.
+
+The sample is intentionally small. Its accuracy and category counts are not meaningful model results. Use a public CFPB export for analysis.
+
 ## Features
 
 - Upload a CFPB complaint CSV file.
@@ -154,6 +160,7 @@ customer-feedback-theme-classifier/
 │   └── api_client.py
 ├── data/
 │   └── .gitkeep
+│   └── sample_complaints.csv
 ├── models/
 │   └── .gitkeep
 └── notebooks/
@@ -181,7 +188,7 @@ Do not upload or commit:
 - downloaded CFPB CSV files
 - trained `.joblib` model files
 
-The `.gitignore` file excludes `data/*.csv` and `models/*.joblib`.
+The `.gitignore` file excludes downloaded CSV files and `models/*.joblib`. The only CSV tracked by the repository is the synthetic `data/sample_complaints.csv` smoke-test dataset.
 
 ## Limitations
 
