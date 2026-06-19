@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.model import predict_theme_with_confidence, train_model
+from src.model import predict_theme_with_confidence, predict_themes_with_confidence, train_model
 
 
 def test_train_model_and_predict_theme_with_confidence():
@@ -36,3 +36,20 @@ def test_train_model_and_predict_theme_with_confidence():
     assert set(labels) == {"Checking or savings account", "Credit card"}
     assert prediction["prediction"] in labels
     assert set(prediction["confidence_scores"]) == set(labels)
+
+    batch_predictions = predict_themes_with_confidence(
+        model,
+        [
+            "My checking account has an unexpected fee.",
+            "My credit card payment was declined.",
+        ],
+    )
+
+    assert batch_predictions.columns.tolist() == [
+        "Feedback",
+        "Predicted category",
+        "Confidence",
+    ]
+    assert len(batch_predictions) == 2
+    assert set(batch_predictions["Predicted category"]).issubset(set(labels))
+    assert batch_predictions["Confidence"].between(0, 1).all()

@@ -20,7 +20,12 @@ from src.config import (
 )
 from src.data_loader import limit_rows, load_csv, validate_required_columns
 from src.evaluation import create_confusion_matrix_figure, evaluate_model, get_top_categories
-from src.model import predict_theme_with_confidence, save_model, train_model
+from src.model import (
+    predict_theme_with_confidence,
+    predict_themes_with_confidence,
+    save_model,
+    train_model,
+)
 from src.preprocessing import clean_text, prepare_training_data
 
 logging.basicConfig(level=logging.INFO)
@@ -46,6 +51,8 @@ if "model_pipeline" not in st.session_state:
     st.session_state.model_pipeline = None
 if "evaluation_results" not in st.session_state:
     st.session_state.evaluation_results = None
+if "batch_prediction_results" not in st.session_state:
+    st.session_state.batch_prediction_results = None
 
 st.sidebar.header("Controls")
 target_column = st.sidebar.selectbox(
@@ -136,6 +143,7 @@ if complaints_df is not None and not complaints_df.empty:
                     evaluation_results = evaluate_model(y_test, predictions, labels)
                     st.session_state.model_pipeline = model_pipeline
                     st.session_state.evaluation_results = evaluation_results
+                    st.session_state.batch_prediction_results = None
 
                     if save_trained_model:
                         save_model(model_pipeline, MODEL_PATH)
@@ -191,6 +199,41 @@ if complaints_df is not None and not complaints_df.empty:
                     )[:5]
                     for label, probability in top_predictions:
                         st.write(f"{label}: {probability:.2%}")
+
+        st.subheader("Batch Classify Feedback")
+        batch_input = st.text_area(
+            "Paste one feedback message per line",
+            key="batch_feedback_input",
+        )
+        if st.button("Create Prediction File"):
+            if st.session_state.model_pipeline is None:
+                st.error("Please train a model before creating predictions.")
+            else:
+                feedback_messages = [
+                    message.strip()
+                    for message in batch_input.splitlines()
+                    if message.strip()
+                ]
+                if not feedback_messages:
+                    st.error("Enter at least one feedback message.")
+                else:
+                    cleaned_feedback = [clean_text(message) for message in feedback_messages]
+                    batch_results = predict_themes_with_confidence(
+                        st.session_state.model_pipeline,
+                        cleaned_feedback,
+                    )
+                    batch_results["Feedback"] = feedback_messages
+                    st.session_state.batch_prediction_results = batch_results
+
+        batch_prediction_results = st.session_state.batch_prediction_results
+        if batch_prediction_results is not None:
+            st.dataframe(batch_prediction_results, use_container_width=True)
+            st.download_button(
+                "Download Predictions CSV",
+                data=batch_prediction_results.to_csv(index=False).encode("utf-8"),
+                file_name="feedback_theme_predictions.csv",
+                mime="text/csv",
+            )
 
         st.subheader("Business Insights")
         chart_columns = [

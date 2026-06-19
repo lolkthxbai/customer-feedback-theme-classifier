@@ -57,6 +57,7 @@ The sample is intentionally small. Its accuracy and category counts are not mean
 - Save the trained model locally with joblib.
 - Paste a new complaint or feedback message and predict its likely category.
 - Display prediction confidence scores when available.
+- Create and download CSV results for multiple feedback messages.
 - Show business insight charts for top products, issues, states, companies, submission channels, and response categories.
 - Optionally fetch a small CFPB API sample for preview/demo use.
 
@@ -210,7 +211,6 @@ The `.gitignore` file excludes downloaded CSV files and `models/*.joblib`. The o
 ## Future Improvements
 
 - Add a Multinomial Naive Bayes comparison model.
-- Add downloadable prediction results.
 - Add screenshots to this README.
 - Add unit tests with pytest.
 - Deploy the app to Streamlit Community Cloud.

@@ -120,3 +120,25 @@ def predict_theme_with_confidence(model: Pipeline, text: str) -> dict:
         }
 
     return prediction_details
+
+
+def predict_themes_with_confidence(model: Pipeline, texts: list[str]) -> pd.DataFrame:
+    """
+    Predict categories for multiple feedback messages and return top confidence scores.
+    """
+    if not texts:
+        raise ValueError("At least one feedback message is required for batch prediction.")
+
+    predictions = model.predict(texts)
+    prediction_results = pd.DataFrame(
+        {
+            "Feedback": texts,
+            "Predicted category": [str(prediction) for prediction in predictions],
+        }
+    )
+
+    if hasattr(model, "predict_proba"):
+        probabilities = model.predict_proba(texts)
+        prediction_results["Confidence"] = probabilities.max(axis=1)
+
+    return prediction_results
