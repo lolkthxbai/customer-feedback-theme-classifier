@@ -19,7 +19,7 @@ from src.config import (
     TEXT_COLUMN,
 )
 from src.data_loader import limit_rows, load_csv, validate_required_columns
-from src.evaluation import evaluate_model, get_top_categories
+from src.evaluation import create_confusion_matrix_figure, evaluate_model, get_top_categories
 from src.model import predict_theme_with_confidence, save_model, train_model
 from src.preprocessing import clean_text, prepare_training_data
 
@@ -133,7 +133,7 @@ if complaints_df is not None and not complaints_df.empty:
                         target_column=target_column,
                         test_size=float(test_size),
                     )
-                    evaluation_results = evaluate_model(y_test, predictions)
+                    evaluation_results = evaluate_model(y_test, predictions, labels)
                     st.session_state.model_pipeline = model_pipeline
                     st.session_state.evaluation_results = evaluation_results
 
@@ -156,6 +156,12 @@ if complaints_df is not None and not complaints_df.empty:
                 evaluation_results["classification_report_df"],
                 use_container_width=True,
             )
+            st.subheader("Confusion Matrix")
+            confusion_matrix_figure = create_confusion_matrix_figure(
+                evaluation_results["confusion_matrix"],
+                evaluation_results["labels"],
+            )
+            st.pyplot(confusion_matrix_figure, use_container_width=True)
         else:
             st.caption("Train a model to see accuracy and classification metrics.")
 

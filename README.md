@@ -53,6 +53,7 @@ The sample is intentionally small. Its accuracy and category counts are not mean
 - Train a TF-IDF and Logistic Regression text classifier.
 - Choose either `Product` or `Issue` as the target label.
 - Evaluate model accuracy and classification metrics.
+- Display a confusion matrix to identify commonly confused categories.
 - Save the trained model locally with joblib.
 - Paste a new complaint or feedback message and predict its likely category.
 - Display prediction confidence scores when available.
@@ -209,7 +210,6 @@ The `.gitignore` file excludes downloaded CSV files and `models/*.joblib`. The o
 ## Future Improvements
 
 - Add a Multinomial Naive Bayes comparison model.
-- Add a confusion matrix visualization in the Streamlit app.
 - Add downloadable prediction results.
 - Add screenshots to this README.
 - Add unit tests with pytest.
